@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR AI Recruitment Demo</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="6" fill="#4F46E5"/>
+          <path d="M8 20l4-8 4 8M10 17h4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="20" cy="10" r="3" stroke="white" stroke-width="1.8"/>
+        </svg>
+        <span>HireAI</span>
+      </div>
+      <nav class="pipeline">
+        <div class="pipeline-step" data-step="setup">
+          <span class="step-dot"></span>
+          <span class="step-label">Job Setup</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-step="cv_review">
+          <span class="step-dot"></span>
+          <span class="step-label">CV Review</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-step="initial_interview">
+          <span class="step-dot"></span>
+          <span class="step-label">HR Interview</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-step="technical_interview">
+          <span class="step-dot"></span>
+          <span class="step-label">Tech Interview</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-step="report">
+          <span class="step-dot"></span>
+          <span class="step-label">Report</span>
+        </div>
+      </nav>
+      <button id="btn-lang" class="nav-btn btn-lang">&#127760; Español</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ── Panel 1: Setup ─────────────────────────────────────────── -->
+    <section id="panel-setup" class="panel active">
+      <div class="panel-header">
+        <h1>Define the Job Position</h1>
+        <p>Describe the role you're hiring for. Our AI will use this to screen candidates throughout the pipeline.</p>
+      </div>
+      <div class="card">
+        <div class="card-toolbar">
+          <span class="card-title">Job Details</span>
+          <button id="btn-load-example" class="btn btn-ghost">Load Example</button>
+        </div>
+        <form id="job-form">
+          <div class="form-group">
+            <label for="job-title">Job Title</label>
+            <input id="job-title" type="text" placeholder="e.g. Senior Python Backend Engineer" required />
+          </div>
+          <div class="form-group">
+            <label for="job-description">Job Description</label>
+            <textarea id="job-description" rows="4" placeholder="Describe the role, responsibilities, and team context..." required></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="job-experience">Experience Required</label>
+              <input id="job-experience" type="text" placeholder="e.g. 4+ years" required />
+            </div>
+            <div class="form-group">
+              <label for="job-salary">Salary Range</label>
+              <input id="job-salary" type="text" placeholder="e.g. €70,000 - €90,000" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="job-skills">Required Skills <span class="hint">(comma-separated)</span></label>
+            <input id="job-skills" type="text" placeholder="Python, FastAPI, PostgreSQL, Docker" required />
+          </div>
+          <button type="submit" class="btn btn-primary btn-full" id="btn-submit-job">
+            <span class="btn-text">Start Recruitment Pipeline</span>
+            <span class="btn-loader hidden"></span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ── Panel 2: CV Review ─────────────────────────────────────── -->
+    <section id="panel-cv_review" class="panel">
+      <div class="panel-header">
+        <h1>CV Screening</h1>
+        <p>Paste the candidate's CV below. Our AI will score it against the job requirements.</p>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Candidate CV</div>
+          <textarea id="cv-text" rows="16" placeholder="Paste the candidate's CV / resume here..."></textarea>
+          <div class="cv-upload-row">
+            <label for="cv-file-input" id="btn-upload-cv" class="btn btn-ghost btn-upload-label">&#128206; Upload File (PDF/TXT)</label>
+            <input type="file" id="cv-file-input" accept=".pdf,.txt" class="hidden-file-input">
+            <span id="cv-upload-filename" class="upload-filename"></span>
+          </div>
+          <button class="btn btn-primary btn-full mt-16" id="btn-screen-cv">
+            <span class="btn-text">Screen CV with AI</span>
+            <span class="btn-loader hidden"></span>
+          </button>
+        </div>
+        <div id="cv-result-card" class="card hidden">
+          <div class="card-title">Screening Result</div>
+          <div class="score-ring-container">
+            <svg class="score-ring" viewBox="0 0 120 120">
+              <circle class="ring-bg" cx="60" cy="60" r="50"/>
+              <circle id="ring-progress" class="ring-progress" cx="60" cy="60" r="50"/>
+            </svg>
+            <div class="score-center">
+              <span id="score-value" class="score-number">0</span>
+              <span class="score-label">/ 100</span>
+            </div>
+          </div>
+          <div id="score-badge" class="score-badge"></div>
+          <div class="result-section">
+            <h4>Strengths</h4>
+            <ul id="cv-strengths" class="result-list strengths-list"></ul>
+          </div>
+          <div class="result-section">
+            <h4>Gaps</h4>
+            <ul id="cv-gaps" class="result-list gaps-list"></ul>
+          </div>
+          <div class="result-section">
+            <h4>Recommendation</h4>
+            <p id="cv-recommendation" class="recommendation-text"></p>
+          </div>
+          <button class="btn btn-primary btn-full mt-16" id="btn-proceed-interview">
+            Continue to HR Interview →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Panel 3: Initial Interview ────────────────────────────── -->
+    <section id="panel-initial_interview" class="panel">
+      <div class="panel-header">
+        <h1>Initial HR Interview</h1>
+        <p>Chat with our AI HR interviewer. Respond as the candidate would.</p>
+      </div>
+      <div class="chat-container card">
+        <div id="initial-chat-messages" class="chat-messages"></div>
+        <div class="chat-input-area">
+          <textarea id="initial-chat-input" rows="2" placeholder="Type your response as the candidate..." disabled></textarea>
+          <button id="btn-initial-send" class="btn btn-primary" disabled>
+            <span class="btn-text">Send</span>
+            <span class="btn-loader hidden"></span>
+          </button>
+        </div>
+        <div class="chat-end-bar">
+          <button id="btn-initial-end" class="btn btn-ghost btn-end-interview" disabled>End Interview</button>
+        </div>
+        <div id="initial-interview-complete" class="interview-complete hidden">
+          <span class="complete-icon">✓</span>
+          <span id="hr-complete-text">HR Interview Complete</span>
+          <button class="btn btn-primary" id="btn-to-tech-interview">Continue to Technical Interview →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Panel 4: Technical Interview ──────────────────────────── -->
+    <section id="panel-technical_interview" class="panel">
+      <div class="panel-header">
+        <h1>Technical Interview</h1>
+        <p>A senior engineer will now assess your technical skills.</p>
+      </div>
+      <div class="chat-container card">
+        <div id="tech-chat-messages" class="chat-messages"></div>
+        <div class="chat-input-area">
+          <textarea id="tech-chat-input" rows="2" placeholder="Type your technical response..." disabled></textarea>
+          <button id="btn-tech-send" class="btn btn-primary" disabled>
+            <span class="btn-text">Send</span>
+            <span class="btn-loader hidden"></span>
+          </button>
+        </div>
+        <div class="chat-end-bar">
+          <button id="btn-tech-end" class="btn btn-ghost btn-end-interview" disabled>End Interview</button>
+        </div>
+        <div id="tech-interview-complete" class="interview-complete hidden">
+          <span class="complete-icon">✓</span>
+          <span id="tech-complete-text">Technical Interview Complete</span>
+          <button class="btn btn-primary" id="btn-to-report">View Final Report →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Panel 5: Report ────────────────────────────────────────── -->
+    <section id="panel-report" class="panel">
+      <div class="panel-header">
+        <h1>Final Assessment Report</h1>
+        <p>Comprehensive AI-generated evaluation of the candidate.</p>
+      </div>
+      <div id="report-loading" class="card center-content">
+        <div class="spinner-large"></div>
+        <p>Generating comprehensive report...</p>
+      </div>
+      <div id="report-content" class="hidden">
+        <div class="report-top">
+          <div class="card report-overall">
+            <div class="report-score-ring-container">
+              <svg class="score-ring score-ring-lg" viewBox="0 0 120 120">
+                <circle class="ring-bg" cx="60" cy="60" r="50"/>
+                <circle id="report-ring-progress" class="ring-progress" cx="60" cy="60" r="50"/>
+              </svg>
+              <div class="score-center">
+                <span id="report-score-value" class="score-number score-number-lg">0</span>
+                <span class="score-label">Overall</span>
+              </div>
+            </div>
+            <div id="report-recommendation-badge" class="recommendation-badge"></div>
+          </div>
+          <div class="card report-breakdown" id="report-breakdown">
+            <div class="card-title" id="report-breakdown-title">Score Breakdown</div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">CV Screening</span>
+              <div class="breakdown-bar-wrap">
+                <div id="bar-cv" class="breakdown-bar"></div>
+              </div>
+              <span id="bar-cv-val" class="breakdown-val">0</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">HR Interview</span>
+              <div class="breakdown-bar-wrap">
+                <div id="bar-hr" class="breakdown-bar"></div>
+              </div>
+              <span id="bar-hr-val" class="breakdown-val">0</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Technical</span>
+              <div class="breakdown-bar-wrap">
+                <div id="bar-tech" class="breakdown-bar"></div>
+              </div>
+              <span id="bar-tech-val" class="breakdown-val">0</span>
+            </div>
+          </div>
+        </div>
+        <div class="report-bottom">
+          <div class="card">
+            <div class="card-title" id="report-strengths-title">Strengths</div>
+            <ul id="report-strengths" class="result-list strengths-list"></ul>
+          </div>
+          <div class="card">
+            <div class="card-title" id="report-concerns-title">Concerns</div>
+            <ul id="report-concerns" class="result-list gaps-list"></ul>
+          </div>
+          <div class="card report-next-steps">
+            <div class="card-title" id="report-next-steps-title">Recommended Next Steps</div>
+            <ol id="report-next-steps" class="result-list next-steps-list"></ol>
+          </div>
+        </div>
+        <div class="card mt-16 center-content">
+          <button class="btn btn-ghost" id="btn-restart">Start New Recruitment</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast-container"></div>
+
+  <div class="demo-controls">
+    <button id="btn-nav-prev" class="nav-btn" title="Pantalla anterior">&#8592; Atrás</button>
+    <button id="btn-nav-refresh" class="nav-btn nav-btn-refresh" title="Refrescar página">&#8635; Refrescar</button>
+    <button id="btn-nav-next" class="nav-btn" title="Pantalla siguiente">Siguiente &#8594;</button>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

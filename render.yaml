@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: hr-recruitment-demo
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false        # you'll paste the key in the Render dashboard

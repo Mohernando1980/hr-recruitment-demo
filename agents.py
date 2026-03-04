@@ -8,7 +8,10 @@ from google.genai import types, errors
 
 from models import JobPosition, CVScreeningResult, Message, FinalReport, InterviewState
 
-_client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
+_api_key = os.environ.get("GEMINI_API_KEY", "")
+if not _api_key:
+    raise RuntimeError("GEMINI_API_KEY environment variable is not set")
+_client = genai.Client(api_key=_api_key)
 
 MODEL = "gemini-2.5-flash"
 
